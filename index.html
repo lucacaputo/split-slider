@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="split-slider.css">
+    <script src="lib/popmotion.js"></script>
+    <script src="split-slider.js"></script>
+    <title>Split Slider</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="slider">
+        <img src="https://images.unsplash.com/photo-1627735410064-b8ffd0adb155?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1627857517329-f7857341feac?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1469594292607-7bd90f8d3ba4?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1627216363949-b10da09f3989?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1621899154887-22b1b6f7f5cb?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1627512724850-77dfac06441d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1650&q=80" alt="">
+    </div>
+    <script>
+        let slider;
+        window.addEventListener('load', () => {
+            slider = new SplitSlider(document.querySelector('#slider'), { initialSlide: 3 });
+        })
+    </script>
+</body>
+</html>

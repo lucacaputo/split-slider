@@ -1,0 +1,29 @@
+.sp-slider {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    transition: height .15s ease;
+}
+.sp-slider img {
+    width: 100%;
+    display: block;
+    height: auto;
+}
+.sp-slide {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    position: absolute;
+    z-index: 1;
+}
+.sp-slide-canvas {
+    flex: 1 !important;
+}
+.sp-canvas-piece {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.sp-canvas-right {
+    left: 50%;
+}
