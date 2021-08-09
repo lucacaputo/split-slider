@@ -5,6 +5,7 @@ class SplitSlider {
     currentSlideIndex;
     slides = [];
     pieces = [];
+    styledPieces = [];
 
     constructor(rootNode, options={}) {
         if (!rootNode instanceof HTMLElement) throw new Error('supply html element');
@@ -35,22 +36,62 @@ class SplitSlider {
         this.pieces = this.slides.map(this.toCanvas.bind(this));
         this.setSliderHeight();
         window.addEventListener('resize', this.setSliderHeight.bind(this));
-        console.log(this.pieces)
+        this.styledPieces = this.pieces.map(s => [spStyler(s[0]), spStyler(s[1])]);
+        this.dispose(true);
     }
 
     setSliderHeight() {
         this.rootNode.style.height = `${this.pieces[this.currentSlideIndex][0].height}px`;
     }
 
-    dispose() {
+    dispose(init=false) {
         this.currentSlideIndex = this.clamp(this.currentSlideIndex, this.slides.length - 1, 0);
-        this.pieces.forEach(p => {
+        init && this.pieces.forEach(p => {
             this.rootNode.appendChild(p[0]);
             this.rootNode.appendChild(p[1]);
         });
-        const leftPieces = this.pieces.map(p => p[0]);
-        const rightPieces = this.pieces.map(p => p[1]);
-        
+        const leftPieces = this.styledPieces.map(p => p[0]);
+        const rightPieces = this.styledPieces.map(p => p[1]);
+        for(let i = 0; i < this.currentSlideIndex; i++) {
+            let lpOne = leftPieces[i];
+            let rpOne = rightPieces[i];
+            const offOne = i - this.currentSlideIndex;
+            spSpring({
+                from: [
+                    lpOne.get('y'), 
+                    rpOne.get('y'),
+                ],
+                to: [
+                    -offOne*lpOne.get('height'),
+                    offOne*rpOne.get('height'),
+                ],
+                stiffness: 300,
+                damping: 35,
+            }).start(v => {
+                lpOne.set('y', v[0]);
+                rpOne.set('y', v[1]);
+            })
+        }
+        for (let j = this.currentSlideIndex; j < this.pieces.length; j++) {
+            let lpTwo = leftPieces[j];
+            let rpTwo = rightPieces[j];
+            const offTwo = j - this.currentSlideIndex;
+            spSpring({
+                from: [
+                    lpTwo.get('y'), 
+                    rpTwo.get('y'),
+                ],
+                to: [
+                    -offTwo*lpTwo.get('height'),
+                    offTwo*rpTwo.get('height'),
+                ],
+                stiffness: 300,
+                damping: 25,
+            }).start(v => {
+                lpTwo.set('y', v[0]);
+                rpTwo.set('y', v[1]);
+            })
+        }
     }
 
     setCanvasDimensions(canvas, w, h) {
