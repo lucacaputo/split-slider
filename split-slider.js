@@ -77,7 +77,7 @@ class SplitSlider {
                 },
                 complete: () => {
                     if (j === this.pieces.length - 1) {
-                        this.triggerEvent('sp-init', this.rootNode, this);
+                        this.triggerEvent('sp-transition-complete', this.rootNode, this);
                     }
                 }
             })
