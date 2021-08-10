@@ -11,12 +11,15 @@ class SplitSlider {
     slides = [];
     pieces = [];
     styledPieces = [];
+    captions;
+    dotRootNode;
 
     constructor(rootNode, options={}) {
         if (!rootNode instanceof HTMLElement) throw new Error('supply html element');
         else {
             this.rootNode = rootNode;
-            this.currentSlideIndex = options?.initialSlide || 0;
+            this.currentSlideIndex = options.initialSlide || 0;
+            this.captions = options.captions || [];
             this.rootNode.classList.add('sp-slider');
             this.init();
         }
@@ -42,6 +45,7 @@ class SplitSlider {
         this.slides = images.map(i => i.parentNode.removeChild(i));
         this.pieces = this.slides.map(this.toCanvas.bind(this));
         this.setSliderHeight();
+        this.createDots();
         window.addEventListener('resize', this.setSliderHeight.bind(this));
         window.addEventListener('resize', this.dispose.bind(this));
         this.styledPieces = this.pieces.map(s => [spStyler(s[0]), spStyler(s[1])]);
@@ -50,12 +54,38 @@ class SplitSlider {
             .catch(err => console.log(err));
     }
 
+    createDots() {
+        const dotWrapper = document.createElement('div');
+        dotWrapper.className = 'sp-dot-wrapper';
+        for(let i = 0; i < this.slides.length; i++) {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'sp-dot';
+            const innerSpan = document.createElement('span');
+            dot.appendChild(innerSpan);
+            if (this.currentSlideIndex === i) {
+                dot.classList.add('sp-dot-active');
+            }
+            dot.addEventListener('click', this.moveToSlide.bind(this, i));
+            dotWrapper.appendChild(dot);
+        }
+        this.dotRootNode = dotWrapper;
+        this.rootNode.appendChild(this.dotRootNode);
+    }
+
+    moveToSlide(idx) {
+        this.currentSlideIndex = this.clamp(idx, this.slides.length - 1, 0);
+        const dots = [...this.dotRootNode.querySelectorAll('.sp-dot')];
+        dots.forEach(d => d.classList.remove('sp-dot-active'));
+        dots[this.currentSlideIndex].classList.add('sp-dot-active');
+        this.dispose();
+    }
+
     setSliderHeight() {
         this.rootNode.style.height = `${this.pieces[this.currentSlideIndex][0].height}px`;
     }
 
     dispose(init=false) {
-        this.currentSlideIndex = this.clamp(this.currentSlideIndex, this.slides.length - 1, 0);
         init && this.pieces.forEach(p => {
             this.rootNode.appendChild(p[0]);
             this.rootNode.appendChild(p[1]);
@@ -77,8 +107,8 @@ class SplitSlider {
                         -offTwo*lpTwo.get('height'),
                         offTwo*rpTwo.get('height'),
                     ],
-                    stiffness: 300,
-                    damping: 25,
+                    stiffness: 195,
+                    damping: 30,
                 }).start({
                     update: v => {
                         lpTwo.set('y', v[0]);
