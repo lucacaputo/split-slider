@@ -26,7 +26,9 @@ class SplitSlider {
     triggerEvent = (evt, element, data=null) => {
         if (!element instanceof HTMLElement) throw new Error('Event must be dispatched by html elements');
         if (typeof evt !== 'string') throw new Error('Event name must be a string');
-        const event = new CustomEvent(evt, data);
+        const event = new CustomEvent(evt, {
+            detail: data,
+        });
         element.dispatchEvent(event);
     }
 
@@ -36,6 +38,7 @@ class SplitSlider {
         this.pieces = this.slides.map(this.toCanvas.bind(this));
         this.setSliderHeight();
         window.addEventListener('resize', this.setSliderHeight.bind(this));
+        window.addEventListener('resize', this.dispose.bind(this));
         this.styledPieces = this.pieces.map(s => [spStyler(s[0]), spStyler(s[1])]);
         this.dispose(true);
     }
@@ -52,27 +55,7 @@ class SplitSlider {
         });
         const leftPieces = this.styledPieces.map(p => p[0]);
         const rightPieces = this.styledPieces.map(p => p[1]);
-        for(let i = 0; i < this.currentSlideIndex; i++) {
-            let lpOne = leftPieces[i];
-            let rpOne = rightPieces[i];
-            const offOne = i - this.currentSlideIndex;
-            spSpring({
-                from: [
-                    lpOne.get('y'), 
-                    rpOne.get('y'),
-                ],
-                to: [
-                    -offOne*lpOne.get('height'),
-                    offOne*rpOne.get('height'),
-                ],
-                stiffness: 300,
-                damping: 35,
-            }).start(v => {
-                lpOne.set('y', v[0]);
-                rpOne.set('y', v[1]);
-            })
-        }
-        for (let j = this.currentSlideIndex; j < this.pieces.length; j++) {
+        for (let j = 0; j < this.pieces.length; j++) {
             let lpTwo = leftPieces[j];
             let rpTwo = rightPieces[j];
             const offTwo = j - this.currentSlideIndex;
@@ -87,9 +70,16 @@ class SplitSlider {
                 ],
                 stiffness: 300,
                 damping: 25,
-            }).start(v => {
-                lpTwo.set('y', v[0]);
-                rpTwo.set('y', v[1]);
+            }).start({
+                update: v => {
+                    lpTwo.set('y', v[0]);
+                    rpTwo.set('y', v[1]);
+                },
+                complete: () => {
+                    if (j === this.pieces.length - 1) {
+                        this.triggerEvent('sp-init', this.rootNode, this);
+                    }
+                }
             })
         }
     }
