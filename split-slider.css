@@ -59,3 +59,36 @@
 .sp-dot.sp-dot-active span {
     width: 50px;
 }
+.sp-captions-container {
+    width: 90%;
+    height: 100px;
+    position: absolute;
+    z-index: 3;
+    top: calc(50% - 50px);
+    left: 5%;
+    overflow: hidden;
+}
+.sp-captions-inner-wrapper {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+.sp-caption {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+}
+.sp-caption > p {
+    margin-block-end: 0;
+    margin-block-start: 0;
+    text-overflow: ellipsis;
+    font-size: 30px;
+    color: #fff;
+}

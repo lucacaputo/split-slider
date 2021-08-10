@@ -27,7 +27,17 @@
     <script>
         let slider;
         window.addEventListener('load', () => {
-            slider = new SplitSlider(document.querySelector('#slider'), { initialSlide: 2 });
+            slider = new SplitSlider(document.querySelector('#slider'), {
+                initialSlide: 2,
+                captions: [
+                    'Slide 1 caption',
+                    'Slide 2 caption',
+                    'Slide 3 caption',
+                    'Slide 4 caption',
+                    'Slide 5 caption',
+                    'Slide 6 caption',
+                ]
+            });
         })
     </script>
 </body>

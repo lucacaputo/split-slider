@@ -13,6 +13,7 @@ class SplitSlider {
     styledPieces = [];
     captions;
     dotRootNode;
+    captionsRootNode;
 
     constructor(rootNode, options={}) {
         if (!rootNode instanceof HTMLElement) throw new Error('supply html element');
@@ -44,8 +45,10 @@ class SplitSlider {
         const images = [...this.rootNode.querySelectorAll('img')];
         this.slides = images.map(i => i.parentNode.removeChild(i));
         this.pieces = this.slides.map(this.toCanvas.bind(this));
-        this.setSliderHeight();
         this.createDots();
+        this.createCaptionContanier();
+        this.setSliderHeight();
+        this.disposeCaptions();
         window.addEventListener('resize', this.setSliderHeight.bind(this));
         window.addEventListener('resize', this.dispose.bind(this));
         this.styledPieces = this.pieces.map(s => [spStyler(s[0]), spStyler(s[1])]);
@@ -73,16 +76,48 @@ class SplitSlider {
         this.rootNode.appendChild(this.dotRootNode);
     }
 
+    createCaptionContanier() {
+        const container = document.createElement('div');
+        container.className = 'sp-captions-container';
+        const spans = this.slides.map((_, i) => {
+            const span = document.createElement('span');
+            span.className = 'sp-caption';
+            span.innerHTML = `<p>${this.captions[i] || ''}</p>`;
+            span.style.height = `calc(100% / ${this.captions.length})`;
+            return span;
+        });
+        const spansWrapper = document.createElement('div');
+        spansWrapper.className = 'sp-captions-inner-wrapper';
+        spans.forEach(s => spansWrapper.appendChild(s));
+        this.captionsRootNode = spansWrapper;
+        container.appendChild(this.captionsRootNode);
+        this.rootNode.appendChild(container);
+    }
+
+    disposeCaptions() {
+        const sCapts = spStyler(this.captionsRootNode);
+        const cpH = this.captionsRootNode.firstElementChild.clientHeight || 0;
+        spSpring({
+            from: { y: sCapts.get('y') },
+            to: { y: -cpH*this.currentSlideIndex },
+            stiffness: 280,
+            damping: 35,
+        }).start(sCapts.set);
+    }
+
     moveToSlide(idx) {
         this.currentSlideIndex = this.clamp(idx, this.slides.length - 1, 0);
         const dots = [...this.dotRootNode.querySelectorAll('.sp-dot')];
         dots.forEach(d => d.classList.remove('sp-dot-active'));
         dots[this.currentSlideIndex].classList.add('sp-dot-active');
         this.dispose();
+        this.disposeCaptions();
     }
 
     setSliderHeight() {
         this.rootNode.style.height = `${this.pieces[this.currentSlideIndex][0].height}px`;
+        const ch = this.captionsRootNode.parentElement.clientHeight || 0;
+        this.captionsRootNode.style.height = `${ch*this.captions.length}px`;
     }
 
     dispose(init=false) {
