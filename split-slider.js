@@ -1,5 +1,10 @@
 const { spring: spSpring, tween: spTween, easing: spEasing, styler: spStyler } = popmotion;
 
+const events = {
+    INIT: 'sp-init',
+    TRANSITION_END: 'sp-transition-complete',
+}
+
 class SplitSlider {
     rootNode;
     currentSlideIndex;
@@ -40,7 +45,9 @@ class SplitSlider {
         window.addEventListener('resize', this.setSliderHeight.bind(this));
         window.addEventListener('resize', this.dispose.bind(this));
         this.styledPieces = this.pieces.map(s => [spStyler(s[0]), spStyler(s[1])]);
-        this.dispose(true);
+        this.dispose(true)
+            .then(() => this.triggerEvent(events.INIT, this.rootNode))
+            .catch(err => console.log(err));
     }
 
     setSliderHeight() {
@@ -55,33 +62,37 @@ class SplitSlider {
         });
         const leftPieces = this.styledPieces.map(p => p[0]);
         const rightPieces = this.styledPieces.map(p => p[1]);
-        for (let j = 0; j < this.pieces.length; j++) {
-            let lpTwo = leftPieces[j];
-            let rpTwo = rightPieces[j];
-            const offTwo = j - this.currentSlideIndex;
-            spSpring({
-                from: [
-                    lpTwo.get('y'), 
-                    rpTwo.get('y'),
-                ],
-                to: [
-                    -offTwo*lpTwo.get('height'),
-                    offTwo*rpTwo.get('height'),
-                ],
-                stiffness: 300,
-                damping: 25,
-            }).start({
-                update: v => {
-                    lpTwo.set('y', v[0]);
-                    rpTwo.set('y', v[1]);
-                },
-                complete: () => {
-                    if (j === this.pieces.length - 1) {
-                        this.triggerEvent('sp-transition-complete', this.rootNode, this);
+        return new Promise((res, rej) => {
+            for (let j = 0; j < this.pieces.length; j++) {
+                let lpTwo = leftPieces[j];
+                let rpTwo = rightPieces[j];
+                if (!lpTwo || !rpTwo) rej(new Error('piece of slide is undefined'));
+                const offTwo = j - this.currentSlideIndex;
+                spSpring({
+                    from: [
+                        lpTwo.get('y'), 
+                        rpTwo.get('y'),
+                    ],
+                    to: [
+                        -offTwo*lpTwo.get('height'),
+                        offTwo*rpTwo.get('height'),
+                    ],
+                    stiffness: 300,
+                    damping: 25,
+                }).start({
+                    update: v => {
+                        lpTwo.set('y', v[0]);
+                        rpTwo.set('y', v[1]);
+                    },
+                    complete: () => {
+                        if (j === this.pieces.length - 1) {
+                            this.triggerEvent(events.TRANSITION_END, this.rootNode, this);
+                            res();
+                        }
                     }
-                }
-            })
-        }
+                })
+            }
+        });
     }
 
     setCanvasDimensions(canvas, w, h) {
